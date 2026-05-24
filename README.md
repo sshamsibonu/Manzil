@@ -86,3 +86,8 @@ Students can:
 > 9th and 10th grade students in Uzbekistan with international university ambitions.
 
 
+
+
+requirements.txt
+install django 
+
