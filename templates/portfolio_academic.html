@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Manzil — Academic Certificates{% endblock %}
+{% block body_attrs %}data-page="portfolio-academic"{% endblock %}
+
+{% block content %}
+<div class="pf-page">
+  <div class="pf-header">
+    <a href="/portfolio/" class="pf-back">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Back
+    </a>
+    <div class="pf-step">Step 1 of 4</div>
+    <h1>Academic Certificates</h1>
+    <p>Enter your test scores and academic credentials.</p>
+  </div>
+
+  <form id="form-academic" novalidate>
+    {% csrf_token %}
+
+    <div class="pf-section">
+      <div class="pf-section-label">SAT Score <span class="pf-opt">optional</span></div>
+      <div class="pf-row2">
+        <div class="pf-field">
+          <label for="sat_math">Math</label>
+          <div class="pf-input-wrap">
+            <input class="pf-input" type="number" id="sat_math" name="sat_math" min="200" max="800" step="10" placeholder="200–800" value="{{ portfolio.sat_math|default:'' }}">
+            <span class="pf-unit">/ 800</span>
+          </div>
+        </div>
+        <div class="pf-field">
+          <label for="sat_reading">Reading &amp; Writing</label>
+          <div class="pf-input-wrap">
+            <input class="pf-input" type="number" id="sat_reading" name="sat_reading" min="200" max="800" step="10" placeholder="200–800" value="{{ portfolio.sat_reading|default:'' }}">
+            <span class="pf-unit">/ 800</span>
+          </div>
+        </div>
+      </div>
+      <div class="pf-score" id="sat-display" aria-live="polite">Total <strong id="sat-val">—</strong> / 1600</div>
+    </div>
+
+    <div class="pf-section">
+      <div class="pf-section-label">IELTS Score <span class="pf-opt">optional</span></div>
+      <div class="pf-row4">
+        <div class="pf-field"><label for="ielts_l">Listening</label><input class="pf-input pf-input--center" type="number" id="ielts_l" name="ielts_listening" min="0" max="9" step="0.5" placeholder="0–9" value="{{ portfolio.ielts_listening|default:'' }}"></div>
+        <div class="pf-field"><label for="ielts_r">Reading</label><input class="pf-input pf-input--center" type="number" id="ielts_r" name="ielts_reading" min="0" max="9" step="0.5" placeholder="0–9" value="{{ portfolio.ielts_reading|default:'' }}"></div>
+        <div class="pf-field"><label for="ielts_w">Writing</label><input class="pf-input pf-input--center" type="number" id="ielts_w" name="ielts_writing" min="0" max="9" step="0.5" placeholder="0–9" value="{{ portfolio.ielts_writing|default:'' }}"></div>
+        <div class="pf-field"><label for="ielts_s">Speaking</label><input class="pf-input pf-input--center" type="number" id="ielts_s" name="ielts_speaking" min="0" max="9" step="0.5" placeholder="0–9" value="{{ portfolio.ielts_speaking|default:'' }}"></div>
+      </div>
+      <div class="pf-score" id="ielts-display" aria-live="polite">Overall Band <strong id="ielts-val">—</strong> / 9.0</div>
+    </div>
+
+    <div class="pf-section">
+      <div class="pf-section-label">Other Certificates <span class="pf-opt">optional</span></div>
+      <div id="certs-list">
+        <div class="pf-textarea-row">
+          <textarea class="pf-textarea" name="other_certificates[]" rows="2" placeholder="e.g. AP Calculus BC — Score 5, AMC 10 Distinguished Honor Roll">{% if portfolio.other_certificates %}{{ portfolio.other_certificates.0 }}{% endif %}</textarea>
+        </div>
+      </div>
+      <button type="button" class="pf-add" id="btn-add-cert">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v11M1 6.5h11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        Add another
+      </button>
+    </div>
+
+    <div class="pf-actions">
+      <button type="submit" class="btn btn--primary btn--lg btn--shiny" id="btn-academic">
+        <span class="btn__label">Save &amp; Continue</span>
+        <span class="btn__loader" hidden></span>
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function(){
+  'use strict';
+  const satM = document.getElementById('sat_math'), satR = document.getElementById('sat_reading'), satV = document.getElementById('sat-val');
+  function updSat(){ const m=+satM.value,r=+satR.value; satV.textContent=(satM.value&&satR.value)?(m+r):'—'; }
+  satM.addEventListener('input',updSat); satR.addEventListener('input',updSat); updSat();
+
+  const ieltsIds=['ielts_l','ielts_r','ielts_w','ielts_s'], ieltsV=document.getElementById('ielts-val');
+  function updIelts(){ const vs=ieltsIds.map(id=>parseFloat(document.getElementById(id).value)).filter(v=>!isNaN(v)); ieltsV.textContent=vs.length===4?(Math.round(vs.reduce((a,b)=>a+b,0)/4*2)/2).toFixed(1):'—'; }
+  ieltsIds.forEach(id=>document.getElementById(id).addEventListener('input',updIelts)); updIelts();
+
+  const certList=document.getElementById('certs-list');
+  const saved={{ portfolio.other_certificates|default:'[]'|safe }};
+  saved.slice(1).forEach(t=>addCert(t));
+  document.getElementById('btn-add-cert').addEventListener('click',()=>addCert(''));
+  function addCert(v){ const d=document.createElement('div'); d.className='pf-textarea-row pf-textarea-row--del'; d.innerHTML=`<textarea class="pf-textarea" name="other_certificates[]" rows="2" placeholder="e.g. AP Calculus BC — Score 5">${v.replace(/</g,'&lt;')}</textarea><button type="button" class="pf-del-btn" aria-label="Remove"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M1 1l11 11M12 1L1 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>`; d.querySelector('.pf-del-btn').addEventListener('click',()=>d.remove()); certList.appendChild(d); }
+
+  document.getElementById('form-academic').addEventListener('submit', async function(e){
+    e.preventDefault();
+    const btn=document.getElementById('btn-academic');
+    btn.disabled=true; btn.querySelector('.btn__label').hidden=true; btn.querySelector('.btn__loader').hidden=false;
+    const data={section:'academic',other_certificates:[]};
+    new FormData(this).forEach((v,k)=>{ if(k==='other_certificates[]') data.other_certificates.push(v); else data[k]=v; });
+    const csrf=(document.cookie.match(/csrftoken=([^;]+)/)||[])[1]||'';
+    try{
+      const r=await fetch('/portfolio/save/',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json','X-CSRFToken':csrf},body:JSON.stringify(data)});
+      const d=await r.json().catch(()=>({}));
+      if(r.ok&&d.success){ window.location.href='/portfolio/extracurricular/'; }
+      else{ alert(d.error||'Could not save.'); btn.disabled=false; btn.querySelector('.btn__label').hidden=false; btn.querySelector('.btn__loader').hidden=true; }
+    }catch{ alert('Network error.'); btn.disabled=false; btn.querySelector('.btn__label').hidden=false; btn.querySelector('.btn__loader').hidden=true; }
+  });
+})();
+</script>
+{% endblock %}

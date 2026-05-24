@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Manzil — Portfolio{% endblock %}
+{% block body_attrs %}data-page="portfolio-overview"{% endblock %}
+
+{% block content %}
+<div class="pf-page pf-page--overview">
+  <div class="pf-header">
+    <h1>Build Your Portfolio</h1>
+    <p>Complete all four sections so our AI can find your best-matched universities.</p>
+  </div>
+
+  <div class="pf-cards">
+    <a href="/portfolio/academic/" class="pf-card {% if portfolio.academic %}pf-card--done{% endif %}">
+      <div class="pf-card__icon">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2L2 7l8 5 8-5-8-5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M2 13l8 5 8-5M2 10l8 5 8-5" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="pf-card__body">
+        <div class="pf-card__title">Academic Certificates</div>
+        <div class="pf-card__desc">SAT, IELTS, AP exams and other credentials</div>
+      </div>
+      <div class="pf-card__status">
+        {% if portfolio.academic %}
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" fill="rgba(134,239,172,0.15)" stroke="rgba(134,239,172,0.5)" stroke-width="1"/><path d="M5 8l2 2 4-4" stroke="#86efac" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        {% else %}
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v4M10 13H6l-2-2V9l2-4h4l2 4v2l-2 2z" stroke="rgba(255,255,255,0.2)" stroke-width="1.2" stroke-linejoin="round"/></svg>
+        {% endif %}
+      </div>
+    </a>
+
+    <a href="/portfolio/extracurricular/" class="pf-card {% if portfolio.extracurricular %}pf-card--done{% endif %}">
+      <div class="pf-card__icon">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><polygon points="10,2 12.5,7.5 18,8 14,12 15,17.5 10,14.5 5,17.5 6,12 2,8 7.5,7.5" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="pf-card__body">
+        <div class="pf-card__title">Extracurricular Activities</div>
+        <div class="pf-card__desc">Clubs, sports, competitions and projects</div>
+      </div>
+      <div class="pf-card__status">
+        {% if portfolio.extracurricular %}
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" fill="rgba(134,239,172,0.15)" stroke="rgba(134,239,172,0.5)" stroke-width="1"/><path d="M5 8l2 2 4-4" stroke="#86efac" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        {% else %}
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v4M10 13H6l-2-2V9l2-4h4l2 4v2l-2 2z" stroke="rgba(255,255,255,0.2)" stroke-width="1.2" stroke-linejoin="round"/></svg>
+        {% endif %}
+      </div>
+    </a>
+
+    <a href="/portfolio/awards/" class="pf-card {% if portfolio.awards %}pf-card--done{% endif %}">
+      <div class="pf-card__icon">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="8" r="5" stroke="currentColor" stroke-width="1.4"/><path d="M7 13l-2 5M13 13l2 5M7 18h6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      </div>
+      <div class="pf-card__body">
+        <div class="pf-card__title">Honors &amp; Awards</div>
+        <div class="pf-card__desc">Olympiad medals, scholarships, recognition</div>
+      </div>
+      <div class="pf-card__status">
+        {% if portfolio.awards %}
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" fill="rgba(134,239,172,0.15)" stroke="rgba(134,239,172,0.5)" stroke-width="1"/><path d="M5 8l2 2 4-4" stroke="#86efac" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        {% else %}
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v4M10 13H6l-2-2V9l2-4h4l2 4v2l-2 2z" stroke="rgba(255,255,255,0.2)" stroke-width="1.2" stroke-linejoin="round"/></svg>
+        {% endif %}
+      </div>
+    </a>
+
+    <a href="/portfolio/subject/" class="pf-card {% if portfolio.subject %}pf-card--done{% endif %}">
+      <div class="pf-card__icon">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M7 7h6M7 10h6M7 13h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      </div>
+      <div class="pf-card__body">
+        <div class="pf-card__title">Grade &amp; Field</div>
+        <div class="pf-card__desc">Current grade and intended area of study</div>
+      </div>
+      <div class="pf-card__status">
+        {% if portfolio.subject %}
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" fill="rgba(134,239,172,0.15)" stroke="rgba(134,239,172,0.5)" stroke-width="1"/><path d="M5 8l2 2 4-4" stroke="#86efac" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        {% else %}
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v4M10 13H6l-2-2V9l2-4h4l2 4v2l-2 2z" stroke="rgba(255,255,255,0.2)" stroke-width="1.2" stroke-linejoin="round"/></svg>
+        {% endif %}
+      </div>
+    </a>
+  </div>
+
+  <div class="pf-actions">
+    <a href="/portfolio/academic/" class="btn btn--primary btn--lg btn--shiny">
+      <span class="btn__label">{% if portfolio %}Continue Portfolio{% else %}Start Building{% endif %}</span>
+    </a>
+    {% if portfolio %}
+    <button type="button" class="btn btn--ghost btn--sm pf-delete" onclick="deletePf()">Delete &amp; Start Over</button>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function deletePf(){
+  if(!confirm('Delete your portfolio? This cannot be undone.')) return;
+  fetch('/portfolio/delete/',{method:'POST',credentials:'same-origin',
+    headers:{'X-CSRFToken':(document.cookie.match(/csrftoken=([^;]+)/)||[])[1]||'','Content-Type':'application/json'}})
+  .then(r=>r.json()).then(d=>{if(d.success) window.location.reload();});
+}
+</script>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ uni.name }} — Manzil{% endblock %}
+{% block body_attrs %}data-page="university-detail"{% endblock %}
+
+{% block head_extra %}
+<style>
+.detail-page { max-width:680px; margin:0 auto; padding:2.5rem 1.5rem 5rem; }
+.detail-back { display:inline-flex; align-items:center; gap:0.4rem; font-size:0.78rem; color:#94a3b8; text-decoration:none; margin-bottom:2rem; transition:color 0.15s; }
+.detail-back:hover { color:#64748b; }
+.detail-hero { margin-bottom:2.5rem; }
+.detail-flag { font-size:2rem; margin-bottom:0.75rem; }
+.detail-name { font-size:1.6rem; font-weight:700; color:#0f172a; letter-spacing:-0.03em; margin:0 0 0.4rem; }
+.detail-sub { font-size:0.875rem; color:#64748b; }
+.detail-rank { display:inline-flex; align-items:center; gap:0.4rem; margin-top:0.75rem; padding:0.3rem 0.8rem; background:rgba(79,70,229,0.07); border:1px solid rgba(79,70,229,0.18); border-radius:20px; font-size:0.75rem; color:#4f46e5; }
+.detail-grid { display:grid; grid-template-columns:1fr 1fr; gap:1px; background:#e4e4e9; border:1.5px solid #e4e4e9; border-radius:12px; overflow:hidden; margin-bottom:1.5rem; box-shadow:0 1px 3px rgba(0,0,0,0.05); }
+.detail-cell { background:#ffffff; padding:1rem 1.25rem; }
+.detail-cell-label { font-size:0.68rem; text-transform:uppercase; letter-spacing:0.06em; color:#94a3b8; margin-bottom:0.3rem; }
+.detail-cell-val { font-size:0.875rem; color:#374151; }
+.detail-section { border:1.5px solid #e4e4e9; border-radius:10px; padding:1.25rem; margin-bottom:1rem; background:#ffffff; box-shadow:0 1px 3px rgba(0,0,0,0.04); }
+.detail-section-title { font-size:0.72rem; text-transform:uppercase; letter-spacing:0.07em; color:#94a3b8; margin-bottom:0.75rem; }
+.detail-section-body { font-size:0.875rem; color:#64748b; line-height:1.65; }
+.detail-cta { margin-top:2rem; display:flex; gap:0.75rem; flex-wrap:wrap; }
+.btn-cta-ghost { padding:0.65rem 1.25rem; font-size:0.875rem; border:1.5px solid #e4e4e9; border-radius:8px; color:#64748b; text-decoration:none; transition:border-color 0.15s,color 0.15s; }
+.btn-cta-ghost:hover { border-color:#a0aec0; color:#0f172a; }
+.btn-cta { padding:0.65rem 1.5rem; font-size:0.875rem; background:#0f172a; border-radius:8px; color:#fff; text-decoration:none; font-weight:500; transition:background 0.15s; }
+.btn-cta:hover { background:#1e293b; }
+@media(max-width:500px){ .detail-grid{grid-template-columns:1fr;} }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detail-page">
+  <a href="/universities/" class="detail-back">← Back to universities</a>
+  <div class="detail-hero">
+    <div class="detail-flag">{{ uni.flag }}</div>
+    <h1 class="detail-name">{{ uni.name }}</h1>
+    <div class="detail-sub">{{ uni.city }}, {{ uni.country }}</div>
+    <div class="detail-rank">{{ uni.ranking }} · {{ uni.subject_ranking }}</div>
+  </div>
+  <div class="detail-grid">
+    <div class="detail-cell"><div class="detail-cell-label">Acceptance Rate</div><div class="detail-cell-val">{{ uni.acceptance_rate }}</div></div>
+    <div class="detail-cell"><div class="detail-cell-label">Application Deadline</div><div class="detail-cell-val">{{ uni.deadline }}</div></div>
+    <div class="detail-cell"><div class="detail-cell-label">Tuition Fee</div><div class="detail-cell-val">{{ uni.tuition }}</div></div>
+    <div class="detail-cell"><div class="detail-cell-label">Scholarship</div><div class="detail-cell-val">{{ uni.scholarship }}</div></div>
+    <div class="detail-cell"><div class="detail-cell-label">Essays Required</div><div class="detail-cell-val">{{ uni.essays }}</div></div>
+    <div class="detail-cell"><div class="detail-cell-label">Website</div><div class="detail-cell-val">{{ uni.website }}</div></div>
+  </div>
+  <div class="detail-section"><div class="detail-section-title">Requirements</div><div class="detail-section-body">{{ uni.requirements }}</div></div>
+  <div class="detail-section"><div class="detail-section-title">About</div><div class="detail-section-body">{{ uni.description }}</div></div>
+  <div class="detail-cta">
+    <a href="/universities/" class="btn-cta-ghost">← Back</a>
+    <a href="/select-university/{{ uni.id }}/" class="btn-cta">Select this university →</a>
+  </div>
+</div>
+{% endblock %}

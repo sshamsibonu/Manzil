@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Manzil — Extracurricular Activities{% endblock %}
+{% block body_attrs %}data-page="portfolio-extracurricular"{% endblock %}
+
+{% block content %}
+<div class="pf-page">
+  <div class="pf-header">
+    <a href="/portfolio/" class="pf-back">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Back
+    </a>
+    <div class="pf-step">Step 2 of 4</div>
+    <h1>Extracurricular Activities</h1>
+    <p>Clubs, sports, competitions, personal projects — anything outside the classroom.</p>
+  </div>
+
+  <form id="form-extra" novalidate>
+    {% csrf_token %}
+    <div class="pf-section">
+      <div class="pf-section-label">Your Activities <span class="pf-opt">add as many as you like</span></div>
+      <div id="activities-list">
+        <div class="pf-textarea-row">
+          <textarea class="pf-textarea" name="activities[]" rows="3" placeholder="e.g. President, School Robotics Club — organised 3 competitions, coached 20 students">{% if portfolio.activities %}{{ portfolio.activities.0 }}{% endif %}</textarea>
+        </div>
+      </div>
+      <button type="button" class="pf-add" id="btn-add-act">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v11M1 6.5h11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        Add another
+      </button>
+    </div>
+
+    <div class="pf-actions">
+      <button type="submit" class="btn btn--primary btn--lg btn--shiny" id="btn-extra">
+        <span class="btn__label">Save &amp; Continue</span>
+        <span class="btn__loader" hidden></span>
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function(){
+  'use strict';
+  const list=document.getElementById('activities-list');
+  const saved={{ portfolio.activities|default:'[]'|safe }};
+  saved.slice(1).forEach(t=>add(t));
+  document.getElementById('btn-add-act').addEventListener('click',()=>add(''));
+  function add(v){ const d=document.createElement('div'); d.className='pf-textarea-row pf-textarea-row--del'; d.innerHTML=`<textarea class="pf-textarea" name="activities[]" rows="3" placeholder="e.g. President, School Robotics Club">${v.replace(/</g,'&lt;')}</textarea><button type="button" class="pf-del-btn" aria-label="Remove"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M1 1l11 11M12 1L1 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>`; d.querySelector('.pf-del-btn').addEventListener('click',()=>d.remove()); list.appendChild(d); }
+
+  document.getElementById('form-extra').addEventListener('submit', async function(e){
+    e.preventDefault();
+    const btn=document.getElementById('btn-extra');
+    btn.disabled=true; btn.querySelector('.btn__label').hidden=true; btn.querySelector('.btn__loader').hidden=false;
+    const data={section:'extracurricular',activities:[]};
+    new FormData(this).forEach((v,k)=>{ if(k==='activities[]') data.activities.push(v); else data[k]=v; });
+    const csrf=(document.cookie.match(/csrftoken=([^;]+)/)||[])[1]||'';
+    try{
+      const r=await fetch('/portfolio/save/',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json','X-CSRFToken':csrf},body:JSON.stringify(data)});
+      const d=await r.json().catch(()=>({}));
+      if(r.ok&&d.success){ window.location.href='/portfolio/awards/'; }
+      else{ alert(d.error||'Could not save.'); btn.disabled=false; btn.querySelector('.btn__label').hidden=false; btn.querySelector('.btn__loader').hidden=true; }
+    }catch{ alert('Network error.'); btn.disabled=false; btn.querySelector('.btn__label').hidden=false; btn.querySelector('.btn__loader').hidden=true; }
+  });
+})();
+</script>
+{% endblock %}

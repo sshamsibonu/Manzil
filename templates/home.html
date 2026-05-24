@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Manzil — Home{% endblock %}
+
+{% block body_attrs %}data-page="home"{% endblock %}
+
+{% block content %}
+<div class="home-page">
+
+  <!-- ── Hero ── -->
+  <section class="hero" aria-labelledby="hero-heading">
+    <div class="hero__inner">
+
+      <div class="hero__badge">
+        <span class="badge badge--glow">Get Started &mdash; Stage 1 of 3</span>
+      </div>
+
+      <h1 class="hero__heading gradient-text" id="hero-heading">
+        Your dream university<br>is waiting for you
+      </h1>
+
+      <p class="hero__sub">
+        Manzil's AI analyses your academic profile, identifies your ideal universities
+        from 2,800+ institutions worldwide, and builds a step-by-step application
+        roadmap designed specifically for you.
+      </p>
+
+      <div class="hero__actions">
+        <a href="/portfolio/" class="btn btn--primary btn--lg btn--shiny">
+          <span class="btn__label">Create Your Portfolio</span>
+        </a>
+        {% if has_portfolio %}
+        <a href="/portfolio/" class="btn btn--ghost btn--lg hero__continue">
+          <span class="btn__label">Continue &rarr;</span>
+        </a>
+        {% endif %}
+      </div>
+
+    </div>
+
+    <!-- Decorative glow sphere -->
+    <div class="hero__glow" aria-hidden="true"></div>
+  </section>
+
+  <!-- ── Cycling stages ── -->
+  <section class="stages-section" aria-label="How Manzil works — three stages">
+    <div class="stages-section__inner">
+
+      <!-- Timeline track (desktop) -->
+      <div class="stages-timeline" aria-hidden="true">
+        <div class="stages-timeline__line"></div>
+        <div class="stages-timeline__progress" id="stages-progress"></div>
+      </div>
+
+      <div class="stages-cards" id="stages-cards">
+
+        <article class="stage-card" data-stage="0">
+          <div class="stage-card__number" aria-hidden="true">01</div>
+          <div class="stage-card__icon" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+              <rect x="4" y="4" width="20" height="20" rx="4" stroke="currentColor" stroke-width="1.6"/>
+              <path d="M9 14h10M9 10h10M9 18h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3 class="stage-card__title">Build Your Portfolio</h3>
+          <p class="stage-card__desc">Enter your academic certificates, activities, honours, and chosen field. It takes under 5 minutes.</p>
+        </article>
+
+        <article class="stage-card" data-stage="1">
+          <div class="stage-card__number" aria-hidden="true">02</div>
+          <div class="stage-card__icon" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+              <circle cx="14" cy="14" r="9" stroke="currentColor" stroke-width="1.6"/>
+              <path d="M14 9v5l3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M5 14h2M21 14h2M14 5v2M14 21v2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3 class="stage-card__title">AI Finds Your Universities</h3>
+          <p class="stage-card__desc">Our model analyses 2,800+ institutions and surfaces the best-matched universities ranked by your fit score.</p>
+        </article>
+
+        <article class="stage-card" data-stage="2">
+          <div class="stage-card__number" aria-hidden="true">03</div>
+          <div class="stage-card__icon" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+              <path d="M7 4h14a2 2 0 012 2v16a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2z" stroke="currentColor" stroke-width="1.6"/>
+              <path d="M10 11l2 2 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M10 17h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3 class="stage-card__title">Get Your Roadmap</h3>
+          <p class="stage-card__desc">Receive a personalised, step-by-step application roadmap with deadlines, requirements, and action items.</p>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── How It Works ── -->
+  <section class="how-section" aria-labelledby="how-heading">
+    <div class="how-section__inner">
+      <h2 class="how-section__heading" id="how-heading">How It Works</h2>
+
+      <div class="how-grid">
+
+        <div class="how-card">
+          <div class="how-card__icon" aria-hidden="true">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+              <circle cx="16" cy="16" r="13" stroke="currentColor" stroke-width="1.6"/>
+              <path d="M12 16.5l3 3 5-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h3 class="how-card__title">Smart Matching</h3>
+          <p class="how-card__body">Our AI cross-references your profile against real admissions data, acceptance rates, and programme requirements.</p>
+        </div>
+
+        <div class="how-card">
+          <div class="how-card__icon" aria-hidden="true">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+              <path d="M8 26V14l8-8 8 8v12" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+              <rect x="13" y="18" width="6" height="8" rx="1" stroke="currentColor" stroke-width="1.4"/>
+            </svg>
+          </div>
+          <h3 class="how-card__title">2,800+ Universities</h3>
+          <p class="how-card__body">Global coverage spanning North America, Europe, Asia, Australia, and beyond — from Ivy League to hidden gems.</p>
+        </div>
+
+        <div class="how-card">
+          <div class="how-card__icon" aria-hidden="true">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+              <path d="M16 4l2.5 7.5H26l-6.5 4.7 2.5 7.5L16 19l-6 4.7 2.5-7.5L6 11.5h7.5L16 4z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h3 class="how-card__title">Personalised Roadmap</h3>
+          <p class="how-card__body">Every roadmap is unique to you — tailored deadlines, essay prompts, scholarship alerts, and visa guidance.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+</div><!-- /.home-page -->
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function () {
+  'use strict';
+
+  /* ── Cycling stage cards ── */
+  const cards    = document.querySelectorAll('.stage-card');
+  const progress = document.getElementById('stages-progress');
+  let current    = 0;
+  const INTERVAL = 3200;
+
+  function activateStage(idx) {
+    cards.forEach((c, i) => {
+      c.classList.toggle('stage-card--active', i === idx);
+    });
+    if (progress) {
+      progress.style.width = ((idx + 1) / cards.length * 100) + '%';
+    }
+    current = idx;
+  }
+
+  activateStage(0);
+
+  setInterval(function () {
+    activateStage((current + 1) % cards.length);
+  }, INTERVAL);
+
+})();
+</script>
+{% endblock %}

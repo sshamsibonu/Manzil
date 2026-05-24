@@ -1,0 +1,239 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Manzil — Sign In{% endblock %}
+
+{% block body_attrs %}data-page="auth"{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+
+  <!-- Decorative floating orb -->
+  <div class="auth-orb auth-orb--1" aria-hidden="true"></div>
+  <div class="auth-orb auth-orb--2" aria-hidden="true"></div>
+
+  <div class="auth-card">
+
+    <!-- Logo & tagline -->
+    <div class="auth-card__header">
+      <h1 class="auth-card__logo gradient-text">Manzil</h1>
+      <p class="auth-card__tagline">Your AI-powered path to the world's best universities</p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="auth-tabs" role="tablist" aria-label="Authentication options">
+      <button
+        class="auth-tab auth-tab--active"
+        id="tab-signin"
+        role="tab"
+        aria-selected="true"
+        aria-controls="panel-signin"
+        data-tab="signin"
+      >Sign In</button>
+      <button
+        class="auth-tab"
+        id="tab-signup"
+        role="tab"
+        aria-selected="false"
+        aria-controls="panel-signup"
+        data-tab="signup"
+      >Sign Up</button>
+      <span class="auth-tab__indicator" aria-hidden="true"></span>
+    </div>
+
+    <!-- Error message -->
+    <div class="auth-error" id="auth-error" role="alert" aria-live="polite" hidden>
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M8 5v3.5M8 11h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <span id="auth-error-text"></span>
+    </div>
+
+    <!-- Sign In Panel -->
+    <div class="auth-panel auth-panel--active" id="panel-signin" role="tabpanel" aria-labelledby="tab-signin">
+      <form class="auth-form" id="form-signin" novalidate>
+        {% csrf_token %}
+        <div class="form-group">
+          <label class="form-label" for="signin-email">Email address</label>
+          <input
+            class="form-input"
+            type="email"
+            id="signin-email"
+            name="email"
+            autocomplete="email"
+            placeholder="you@example.com"
+            required
+          >
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="signin-password">Password</label>
+          <input
+            class="form-input"
+            type="password"
+            id="signin-password"
+            name="password"
+            autocomplete="current-password"
+            placeholder="••••••••"
+            required
+          >
+        </div>
+        <button type="submit" class="btn btn--primary btn--full btn--shiny" id="btn-signin">
+          <span class="btn__label">Sign In</span>
+          <span class="btn__loader" hidden aria-hidden="true"></span>
+        </button>
+      </form>
+    </div>
+
+    <!-- Sign Up Panel -->
+    <div class="auth-panel" id="panel-signup" role="tabpanel" aria-labelledby="tab-signup" hidden>
+      <form class="auth-form" id="form-signup" novalidate>
+        {% csrf_token %}
+        <div class="form-group">
+          <label class="form-label" for="signup-name">Full name</label>
+          <input
+            class="form-input"
+            type="text"
+            id="signup-name"
+            name="full_name"
+            autocomplete="name"
+            placeholder="Your full name"
+            required
+          >
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="signup-email">Email address</label>
+          <input
+            class="form-input"
+            type="email"
+            id="signup-email"
+            name="email"
+            autocomplete="email"
+            placeholder="you@example.com"
+            required
+          >
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="signup-password">Password</label>
+          <input
+            class="form-input"
+            type="password"
+            id="signup-password"
+            name="password"
+            autocomplete="new-password"
+            placeholder="Create a strong password"
+            required
+            minlength="8"
+          >
+        </div>
+        <button type="submit" class="btn btn--primary btn--full btn--shiny" id="btn-signup">
+          <span class="btn__label">Create Account</span>
+          <span class="btn__loader" hidden aria-hidden="true"></span>
+        </button>
+      </form>
+    </div>
+
+  </div><!-- /.auth-card -->
+</div><!-- /.auth-page -->
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function () {
+  'use strict';
+
+  /* ── Tab switching ── */
+  const tabs     = document.querySelectorAll('.auth-tab');
+  const panels   = document.querySelectorAll('.auth-panel');
+  const indicator = document.querySelector('.auth-tab__indicator');
+
+  function activateTab(tab) {
+    const target = tab.dataset.tab;
+    tabs.forEach(t => {
+      const active = t.dataset.tab === target;
+      t.classList.toggle('auth-tab--active', active);
+      t.setAttribute('aria-selected', active);
+    });
+    panels.forEach(p => {
+      const show = p.id === 'panel-' + target;
+      p.classList.toggle('auth-panel--active', show);
+      p.hidden = !show;
+    });
+    // slide indicator
+    const idx = Array.from(tabs).findIndex(t => t.dataset.tab === target);
+    indicator.style.transform = `translateX(${idx * 100}%)`;
+    clearError();
+  }
+
+  tabs.forEach(tab => tab.addEventListener('click', () => activateTab(tab)));
+
+  /* ── Error helpers ── */
+  function showError(msg) {
+    const box  = document.getElementById('auth-error');
+    const text = document.getElementById('auth-error-text');
+    text.textContent = msg;
+    box.hidden = false;
+  }
+  function clearError() {
+    document.getElementById('auth-error').hidden = true;
+  }
+
+  /* ── Generic submit handler ── */
+  function handleSubmit(formId, endpoint, btnId, redirectUrl) {
+    const form = document.getElementById(formId);
+    const btn  = document.getElementById(btnId);
+
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      clearError();
+
+      const label  = btn.querySelector('.btn__label');
+      const loader = btn.querySelector('.btn__loader');
+      btn.disabled  = true;
+      label.hidden  = true;
+      loader.hidden = false;
+
+      const data = {};
+      new FormData(form).forEach((val, key) => { data[key] = val; });
+
+      try {
+        const res = await fetch(endpoint, {
+          method:  'POST',
+          headers: {
+            'Content-Type':     'application/json',
+            'X-CSRFToken':      data.csrfmiddlewaretoken || getCookie('csrftoken'),
+          },
+          credentials: 'same-origin',
+          body: JSON.stringify(data),
+        });
+
+        const json = await res.json().catch(() => ({}));
+
+        if (res.ok && json.success) {
+          window.location.href = json.redirect || '/';
+        } else {
+          showError(json.error || json.message || 'Something went wrong. Please try again.');
+          btn.disabled  = false;
+          label.hidden  = false;
+          loader.hidden = true;
+        }
+      } catch (err) {
+        showError('Network error — please check your connection.');
+        btn.disabled  = false;
+        label.hidden  = false;
+        loader.hidden = true;
+      }
+    });
+  }
+
+  handleSubmit('form-signin', '/auth/signin/', 'btn-signin');
+  handleSubmit('form-signup', '/auth/signup/', 'btn-signup');
+
+  /* ── CSRF cookie helper ── */
+  function getCookie(name) {
+    const match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+    return match ? decodeURIComponent(match[1]) : '';
+  }
+})();
+</script>
+{% endblock %}

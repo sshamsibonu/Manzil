@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Universities — Manzil{% endblock %}
+{% block body_attrs %}data-page="universities"{% endblock %}
+
+{% block head_extra %}
+<style>
+.unis-page { max-width:780px; margin:0 auto; padding:2.5rem 1.5rem 5rem; }
+.unis-nav { display:flex; align-items:center; gap:0.5rem; font-size:0.75rem; color:#94a3b8; margin-bottom:2.5rem; }
+.unis-nav a { color:inherit; text-decoration:none; transition:color .15s; }
+.unis-nav a:hover { color:#0f172a; }
+.unis-nav span { color:#4f46e5; }
+.unis-nav div { width:1px; height:10px; background:#e4e4e9; }
+.unis-header { margin-bottom:2.5rem; }
+.unis-header h1 { font-size:1.5rem; font-weight:600; color:#0f172a; letter-spacing:-0.03em; margin:0 0 0.5rem; }
+.unis-header p { font-size:0.875rem; color:#64748b; margin:0; }
+.unis-list { display:flex; flex-direction:column; gap:0.75rem; }
+.uni-row { background:#ffffff; border:1.5px solid #e4e4e9; border-radius:10px; padding:1.4rem 1.5rem; display:grid; grid-template-columns:1fr auto; gap:1.25rem; align-items:center; opacity:0; transform:translateY(6px); animation:rowIn 0.4s ease forwards; box-shadow:0 1px 3px rgba(0,0,0,0.05); transition:border-color 0.15s,box-shadow 0.15s; }
+.uni-row:hover { border-color:rgba(79,70,229,0.25); box-shadow:0 4px 12px rgba(0,0,0,0.08); }
+@keyframes rowIn { to { opacity:1; transform:translateY(0); } }
+.uni-row-left {}
+.uni-row-top { display:flex; align-items:center; gap:0.75rem; margin-bottom:0.45rem; }
+.uni-name { font-size:1rem; font-weight:600; color:#0f172a; }
+.uni-rank { font-size:0.7rem; color:#4f46e5; background:rgba(79,70,229,0.07); border:1px solid rgba(79,70,229,0.18); padding:0.18rem 0.6rem; border-radius:20px; white-space:nowrap; }
+.uni-meta { font-size:0.78rem; color:#94a3b8; margin-bottom:0.6rem; }
+.uni-pills { display:flex; flex-wrap:wrap; gap:0.35rem; }
+.uni-pill { font-size:0.7rem; color:#64748b; background:#f8f8fb; border:1px solid #e4e4e9; padding:0.2rem 0.6rem; border-radius:4px; }
+.uni-row-right { display:flex; flex-direction:column; gap:0.5rem; align-items:flex-end; flex-shrink:0; }
+.uni-actions { display:flex; gap:0.5rem; }
+.btn-detail { padding:0.42rem 0.9rem; font-size:0.78rem; background:transparent; border:1.5px solid #e4e4e9; border-radius:6px; color:#64748b; text-decoration:none; transition:border-color 0.15s,color 0.15s; white-space:nowrap; }
+.btn-detail:hover { border-color:#a0aec0; color:#0f172a; }
+.btn-select { padding:0.42rem 0.9rem; font-size:0.78rem; background:#0f172a; border:none; border-radius:6px; color:#fff; text-decoration:none; cursor:pointer; transition:background 0.15s; white-space:nowrap; }
+.btn-select:hover { background:#1e293b; }
+@media(max-width:560px){ .uni-row{grid-template-columns:1fr;} .uni-row-right{align-items:flex-start;} .uni-actions{flex-wrap:wrap;} }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="unis-page">
+  <div class="unis-nav">
+    <a href="/portfolio/" style="color:inherit;text-decoration:none;">Portfolio</a>
+    <div></div>
+    <span>University</span>
+    <div></div>
+    <span style="color:#4a4a5a;">Roadmap</span>
+  </div>
+  <div class="unis-header">
+    <h1>Your matched universities</h1>
+    <p>Select one to generate your personalised application roadmap.</p>
+  </div>
+  <div class="unis-list">
+    {% for uni in universities %}
+    <div class="uni-row" style="--i:{{ forloop.counter0 }}; animation-delay:calc(var(--i)*0.15s);">
+      <div class="uni-row-left">
+        <div class="uni-row-top">
+          <span class="uni-name">{{ uni.flag }} {{ uni.name }}</span>
+          <span class="uni-rank">{{ uni.ranking }}</span>
+        </div>
+        <div class="uni-meta">{{ uni.city }}, {{ uni.country }} · Deadline: {{ uni.deadline }}</div>
+        <div class="uni-pills">
+          <span class="uni-pill">{{ uni.acceptance_rate }} acceptance</span>
+          <span class="uni-pill">{{ uni.tuition }}</span>
+          <span class="uni-pill">{{ uni.scholarship }}</span>
+        </div>
+      </div>
+      <div class="uni-row-right">
+        <div class="uni-actions">
+          <a href="/university/{{ uni.id }}/" class="btn-detail">Details</a>
+          <a href="/select-university/{{ uni.id }}/" class="btn-select">Select →</a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
