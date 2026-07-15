@@ -1,12 +1,20 @@
+import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'manzil-dev-secret-key-2024-change-in-production'
+SECRET_KEY = os.environ.get(
+    'SECRET_KEY',
+    'manzil-dev-secret-key-2024-change-in-production',
+)
 
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 'yes')
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.environ.get('ALLOWED_HOSTS', '*').split(',')
+    if host.strip()
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -20,7 +28,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # Add this line
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -68,9 +76,16 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
+# Leading slash is required so CSS/JS always load from /static/... on every page
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+STORAGES = {
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+    },
+}
 
 LOGIN_URL = '/auth/'
 LOGIN_REDIRECT_URL = '/home/'
@@ -79,16 +94,11 @@ LOGOUT_REDIRECT_URL = '/auth/'
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-STATIC_URL = "static/"
 
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
+# Needed behind Render's proxy
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(',')
+    if origin.strip()
 ]
-
-STATIC_ROOT = BASE_DIR / "staticfiles"
-
-STORAGES = {
-    "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-    },
-}
