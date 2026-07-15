@@ -1,0 +1,422 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Your Roadmap — Manzil{% endblock %}
+{% block body_attrs %}data-page="roadmap"{% endblock %}
+
+{% block head_extra %}
+<style>
+/* ── Page ── */
+.rm-page { min-height:100vh; background:transparent; }
+.rm-wrap { max-width: 960px; margin: 0 auto; padding: 2.5rem 1.5rem 6rem; }
+
+/* ── Top nav ── */
+.rm-topnav { display:flex; align-items:center; gap:0.5rem; font-size:0.75rem; color:#94a3b8; margin-bottom:2.5rem; }
+.rm-topnav a { color:inherit; text-decoration:none; transition:color .15s; }
+.rm-topnav a:hover { color:#0f172a; }
+.rm-topnav span { color:#4f46e5; }
+.rm-topnav-sep { width:1px; height:10px; background:#e4e4e9; }
+
+/* ── Header ── */
+.rm-header { display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:1rem; margin-bottom:2rem; }
+.rm-header h1 { font-size:1.4rem; font-weight:700; letter-spacing:-0.03em; color:#0f172a; margin:0 0 0.25rem; }
+.rm-header p { font-size:0.82rem; color:#64748b; margin:0; }
+.rm-uni-tag { display:inline-flex; align-items:center; gap:0.4rem; padding:0.3rem 0.85rem; border:1.5px solid rgba(79,70,229,0.2); border-radius:20px; font-size:0.72rem; color:#4f46e5; background:rgba(79,70,229,0.06); white-space:nowrap; }
+
+/* ── Progress ── */
+.rm-progress-wrap { margin-bottom:2.5rem; }
+.rm-progress-bar { height:4px; background:#e4e4e9; border-radius:2px; overflow:hidden; }
+.rm-progress-fill { height:100%; background:#4f46e5; border-radius:2px; transition:width .6s ease; }
+.rm-progress-text { font-size:0.72rem; color:#94a3b8; margin-top:0.45rem; }
+
+/* ═══════════════════════
+   ROADMAP VISUAL — spine + phases
+   ═══════════════════════ */
+.rm-map { position:relative; }
+
+/* Vertical spine line */
+.rm-map::before {
+  content:'';
+  position:absolute;
+  left: 19px;
+  top: 28px;
+  bottom: 28px;
+  width: 2px;
+  background: linear-gradient(to bottom, #e4e4e9 0%, #c7d2fe 50%, #e4e4e9 100%);
+  z-index: 0;
+}
+
+/* ── Phase block ── */
+.rm-phase { position:relative; padding-left:56px; margin-bottom:3rem; }
+
+/* Phase node on spine */
+.rm-phase-node {
+  position:absolute; left:0; top:0;
+  width:40px; height:40px;
+  background:#fff; border:2px solid #e4e4e9;
+  border-radius:50%; display:flex; align-items:center; justify-content:center;
+  z-index:1; transition:border-color .3s, box-shadow .3s;
+}
+.rm-phase-node.active { border-color:#4f46e5; box-shadow:0 0 0 4px rgba(79,70,229,0.12); }
+.rm-phase-node.done { border-color:#16a34a; background:rgba(22,163,74,0.07); }
+.rm-phase-num { font-size:0.78rem; font-weight:700; color:#94a3b8; }
+.rm-phase-node.active .rm-phase-num { color:#4f46e5; }
+.rm-phase-node.done .rm-phase-num { color:#16a34a; }
+
+/* Phase title row */
+.rm-phase-head {
+  display:flex; align-items:center; gap:0.75rem;
+  margin-bottom:1.25rem; padding-top:0.5rem;
+}
+.rm-phase-title { font-size:1rem; font-weight:700; letter-spacing:-0.02em; color:#0f172a; }
+.rm-phase-badge {
+  font-size:0.66rem; font-weight:600; text-transform:uppercase; letter-spacing:0.07em;
+  padding:0.2rem 0.65rem; border-radius:20px; border:1px solid #e4e4e9;
+  color:#94a3b8; background:#f8f8fb;
+}
+.rm-phase-node.active + .rm-phase-head .rm-phase-badge { border-color:rgba(79,70,229,0.25); color:#4f46e5; background:rgba(79,70,229,0.06); }
+.rm-phase-done-count { font-size:0.72rem; color:#94a3b8; margin-left:auto; }
+
+/* ── Grade columns ── */
+.rm-grade-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; }
+@media(max-width:600px){ .rm-grade-grid{grid-template-columns:1fr;} }
+
+.rm-grade-col {}
+.rm-grade-label {
+  font-size:0.66rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em;
+  color:#94a3b8; margin-bottom:0.75rem; padding:0.28rem 0.65rem;
+  background:#f8f8fb; border:1px solid #e4e4e9; border-radius:4px; display:inline-block;
+}
+
+/* ── Task group (milestone cluster) ── */
+.rm-cluster { margin-bottom:1.1rem; }
+.rm-cluster-title {
+  font-size:0.75rem; font-weight:600; color:#374151;
+  margin-bottom:0.5rem; display:flex; align-items:center; gap:0.4rem;
+}
+.rm-cluster-title::before { content:''; width:6px; height:6px; border-radius:50%; background:#c7d2fe; flex-shrink:0; }
+
+/* ── Milestone item (the "map node" design) ── */
+.rm-milestone {
+  display:flex; align-items:flex-start; gap:0.55rem;
+  padding:0.55rem 0.75rem; border-radius:8px;
+  background:#fff; border:1.5px solid #e4e4e9;
+  margin-bottom:0.4rem; cursor:pointer;
+  transition:border-color .15s, box-shadow .15s;
+  /* AI gen: start hidden */
+  opacity:0; transform:translateY(6px);
+}
+.rm-milestone.visible {
+  opacity:1; transform:translateY(0);
+  transition:opacity .35s ease, transform .35s ease, border-color .15s, box-shadow .15s;
+}
+.rm-milestone:hover { border-color:#c7d2fe; box-shadow:0 2px 8px rgba(79,70,229,0.08); }
+.rm-milestone.checked { border-color:rgba(22,163,74,0.25); background:rgba(22,163,74,0.03); }
+.rm-milestone.checked .rm-milestone-text { color:#94a3b8; text-decoration:line-through; }
+
+.rm-cb { width:16px; height:16px; flex-shrink:0; margin-top:1px; accent-color:#4f46e5; cursor:pointer; }
+.rm-milestone-text { font-size:0.79rem; color:#374151; line-height:1.55; }
+.rm-milestone a { color:#4f46e5; text-decoration:none; }
+.rm-milestone a:hover { text-decoration:underline; }
+
+/* ── Note/tip ── */
+.rm-tip {
+  font-size:0.72rem; color:#94a3b8; font-style:italic;
+  padding:0.4rem 0.7rem; border-left:2px solid #c7d2fe;
+  margin:0.2rem 0 0.8rem; background:rgba(199,210,254,0.08); border-radius:0 4px 4px 0;
+  opacity:0; transform:translateY(6px);
+}
+.rm-tip.visible { opacity:1; transform:translateY(0); transition:opacity .35s ease, transform .35s ease; }
+
+/* ── Summary bar at bottom ── */
+.rm-summary {
+  margin-top:3rem; padding:1.5rem; background:#fff;
+  border:1.5px solid #e4e4e9; border-radius:12px;
+  display:grid; grid-template-columns:repeat(3,1fr); gap:1rem;
+  box-shadow:0 1px 3px rgba(0,0,0,0.05);
+}
+.rm-summary-item { text-align:center; }
+.rm-summary-val { font-size:1.25rem; font-weight:700; color:#0f172a; letter-spacing:-0.03em; }
+.rm-summary-lbl { font-size:0.68rem; text-transform:uppercase; letter-spacing:0.06em; color:#94a3b8; margin-top:0.2rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="rm-wrap">
+
+  <div class="rm-topnav">
+    <a href="/portfolio/">Portfolio</a><div class="rm-topnav-sep"></div>
+    <a href="/universities/">University</a><div class="rm-topnav-sep"></div>
+    <span>Roadmap</span>
+  </div>
+
+  <div class="rm-header">
+    <div>
+      <h1>Your application roadmap</h1>
+      <p>Two-year plan across Grade 10 &amp; 11 — check tasks as you complete them.</p>
+    </div>
+    {% if uni %}<div class="rm-uni-tag">{{ uni.flag }} {{ uni.name }}</div>{% endif %}
+  </div>
+
+  <div class="rm-progress-wrap">
+    <div class="rm-progress-bar"><div class="rm-progress-fill" id="rm-fill" style="width:0"></div></div>
+    <div class="rm-progress-text" id="rm-ptext">Loading…</div>
+  </div>
+
+  <div class="rm-map" id="rm-map">
+
+    <!-- ═══ PHASE 1: ACADEMIC STATS ═══ -->
+    <div class="rm-phase" id="phase-1">
+      <div class="rm-phase-node" id="node-1"><span class="rm-phase-num">1</span></div>
+      <div class="rm-phase-head">
+        <div class="rm-phase-title">Academic Stats</div>
+        <div class="rm-phase-badge">Foundation</div>
+        <div class="rm-phase-done-count" id="done-1"></div>
+      </div>
+      <div class="rm-grade-grid">
+        <div class="rm-grade-col">
+          <div class="rm-grade-label">Grade 10</div>
+
+          <div class="rm-cluster">
+            <div class="rm-cluster-title">GPA</div>
+            <label class="rm-milestone"><input class="rm-cb" type="checkbox" data-id="a1"><span class="rm-milestone-text">Target 3.5+ GPA — real goal 3.7–3.8+</span></label>
+            <label class="rm-milestone"><input class="rm-cb" type="checkbox" data-id="a2"><span class="rm-milestone-text">Prioritise Math, Physics, Computer Science</span></label>
+            <label class="rm-milestone"><input class="rm-cb" type="checkbox" data-id="a3"><span class="rm-milestone-text">Identify two weakest subjects and start improving early</span></label>
+            <div class="rm-tip">Upward academic trends matter — a weaker G10 can be recovered in G11.</div>
+          </div>
+
+          <div class="rm-cluster">
+            <div class="rm-cluster-title">Statistics &amp; Probability</div>
+            <label class="rm-milestone"><input class="rm-cb" type="checkbox" data-id="a4"><span class="rm-milestone-text">Study probability, statistics and data interpretation</span></label>
+            <label class="rm-milestone"><input class="rm-cb" type="checkbox" data-id="a5"><span class="rm-milestone-text">Complete <a href="https://www.khanacademy.org/math/statistics-probability" target="_blank">Khan Academy Statistics &amp; Probability</a></span></label>
+          </div>
+
+          <div class="rm-cluster">
+            <div class="rm-cluster-title">Coding &amp; Data Science</div>
+            <label class="rm-milestone"><input class="rm-cb" type="checkbox" data-id="a6"><span class="rm-milestone-text">Complete <a href="https://www.kaggle.com/learn/python" target="_blank">Kaggle Learn Python</a> and Pandas</span></label>
+            <label class="rm-milestone"><input class="rm-cb" type="checkbox" data-id="a7"><span class="rm-milestone-text">Complete <a href="https://grow.google/certificates/data-analytics" target="_blank">Google Data Analytics Certificate</a> (SQL, Tableau)</span></label>
+          </div>
+
+          <div class="rm-cluster">
+            <div class="rm-cluster-title">Language</div>
+            <label class="rm-milestone"><input class="rm-cb" type="checkbox" data-id="a8"><span class="rm-milestone-text">Begin IELTS prep — target 7.0+</span></label>
+            <label class="rm-milestone"><input class="rm-cb" type="checkbox" data-id="a9"><span class="rm-milestone-text">Focus heavily on Writing Task 2 and Speaking</span></label>
+          </div>
+        </div>
+
+        <div class="rm-grade-col">
+          <div class="rm-grade-label">Grade 11</div>
+
+          <div class="rm-cluster">
+            <div class="rm-cluster-title">GPA &amp; Coursework</div>
+            <label class="rm-milestone"><input class="rm-cb" type="checkbox" data-id="a10"><span class="rm-milestone-text">Push toward 3.8–4.0 — junior year is the strongest academic signal</span></label>
+            <label class="rm-milestone"><input class="rm-cb" type="checkbox" data-id="a11"><span class="rm-milestone-text">Take hardest courses available: Pre-calculus, Calculus, Advanced STEM</span></label>
+            <div class="rm-tip">Rigorous coursework &gt; easy perfect grades.</div>
+          </div>
+
+          <div class="rm-cluster">
+            <div class="rm-cluster-title">Calculus</div>
+            <label class="rm-milestone"><input class="rm-cb" type="checkbox" data-id="a12"><span class="rm-milestone-text">Self-study via <a href="https://www.khanacademy.org/math/calculus-1" target="_blank">Khan Academy Calculus</a> or <a href="https://ocw.mit.edu/courses/18-01sc-single-variable-calculus-fall-2010" target="_blank">MIT OCW</a></span></label>
+            <label class="rm-milestone"><input class="rm-cb" type="checkbox" data-id="a13"><span class="rm-milestone-text">Mention self-study in Common App Additional Information section</span></label>
+          </div>
+
+          <div class="rm-cluster">
+            <div class="rm-cluster-title">Math Competitions</div>
+            <label class="rm-milestone"><input class="rm-cb" type="checkbox" data-id="a14"><span class="rm-milestone-text">Participate in regional math competitions and school olympiads</span></label>
+            <label class="rm-milestone"><input class="rm-cb" type="checkbox" data-id="a15"><span class="rm-milestone-text">Take AMC 10 internationally — target 90+/150, AIME if possible</span></label>
+          </div>
+
+          <div class="rm-cluster">
+            <div class="rm-cluster-title">Projects &amp; Language</div>
+            <label class="rm-milestone"><input class="rm-cb" type="checkbox" data-id="a16"><span class="rm-milestone-text">Build 2 GitHub projects: sports analytics + Uzbekistan-focused dataset</span></label>
+            <label class="rm-milestone"><input class="rm-cb" type="checkbox" data-id="a17"><span class="rm-milestone-text">Learn SQL, matplotlib, Tableau via <a href="https://www.kaggle.com/learn/intro-to-sql" target="_blank">Kaggle SQL</a></span></label>
+            <label class="rm-milestone"><input class="rm-cb" type="checkbox" data-id="a18"><span class="rm-milestone-text">Retake IELTS by May — leaves time for a second attempt</span></label>
+            <label class="rm-milestone"><input class="rm-cb" type="checkbox" data-id="a19"><span class="rm-milestone-text">Consider TOEFL as backup: target 88+ (100+ competitive)</span></label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PHASE 2: HONORS & AWARDS ═══ -->
+    <div class="rm-phase" id="phase-2">
+      <div class="rm-phase-node" id="node-2"><span class="rm-phase-num">2</span></div>
+      <div class="rm-phase-head">
+        <div class="rm-phase-title">Honors &amp; Awards</div>
+        <div class="rm-phase-badge">Distinction</div>
+        <div class="rm-phase-done-count" id="done-2"></div>
+      </div>
+      <div class="rm-grade-grid">
+        <div class="rm-grade-col">
+          <div class="rm-grade-label">Grade 10</div>
+          <div class="rm-cluster">
+            <div class="rm-cluster-title">Sports Achievements</div>
+            <label class="rm-milestone"><input class="rm-cb" type="checkbox" data-id="h1"><span class="rm-milestone-text">Document achievements precisely: name, year, event, ranking, competitors</span></label>
+            <label class="rm-milestone"><input class="rm-cb" type="checkbox" data-id="h2"><span class="rm-milestone-text">Format: "Regional Silver — 200m Freestyle, 2024, 45 competitors"</span></label>
+          </div>
+          <div class="rm-cluster">
+            <div class="rm-cluster-title">Data Science Competitions</div>
+            <label class="rm-milestone"><input class="rm-cb" type="checkbox" data-id="h3"><span class="rm-milestone-text">Enter Kaggle competitions, science fairs, STEM &amp; coding contests</span></label>
+            <label class="rm-milestone"><input class="rm-cb" type="checkbox" data-id="h4"><span class="rm-milestone-text">Aim for ranked outcomes, not just participation</span></label>
+          </div>
+          <div class="rm-cluster">
+            <div class="rm-cluster-title">Certifications</div>
+            <label class="rm-milestone"><input class="rm-cb" type="checkbox" data-id="h5"><span class="rm-milestone-text">Complete Google Data Analytics Certificate</span></label>
+            <label class="rm-milestone"><input class="rm-cb" type="checkbox" data-id="h6"><span class="rm-milestone-text">Complete freeCodeCamp certifications — list estimated hours on apps</span></label>
+          </div>
+        </div>
+        <div class="rm-grade-col">
+          <div class="rm-grade-label">Grade 11</div>
+          <div class="rm-cluster">
+            <div class="rm-cluster-title">National Sports</div>
+            <label class="rm-milestone"><input class="rm-cb" type="checkbox" data-id="h7"><span class="rm-milestone-text">Aim for national-level competitions, top regional placements</span></label>
+            <label class="rm-milestone"><input class="rm-cb" type="checkbox" data-id="h8"><span class="rm-milestone-text">Seek rec letters from Uzbekistan Swimming Federation or Athletics Committee</span></label>
+            <div class="rm-tip">Federation recognition = strong third-party validation.</div>
+          </div>
+          <div class="rm-cluster">
+            <div class="rm-cluster-title">Sports Analytics Awards</div>
+            <label class="rm-milestone"><input class="rm-cb" type="checkbox" data-id="h9"><span class="rm-milestone-text">Submit sports-data projects to science fairs &amp; informatics olympiads</span></label>
+            <label class="rm-milestone"><input class="rm-cb" type="checkbox" data-id="h10"><span class="rm-milestone-text">Build Kaggle ranking — public, verifiable, international</span></label>
+            <label class="rm-milestone"><input class="rm-cb" type="checkbox" data-id="h11"><span class="rm-milestone-text">Include Kaggle profile link in applications</span></label>
+          </div>
+          <div class="rm-cluster">
+            <div class="rm-cluster-title">Major Certifications</div>
+            <label class="rm-milestone"><input class="rm-cb" type="checkbox" data-id="h12"><span class="rm-milestone-text">Complete <a href="https://cs50.harvard.edu/python" target="_blank">CS50P Python</a> — Harvard's Python certificate</span></label>
+            <label class="rm-milestone"><input class="rm-cb" type="checkbox" data-id="h13"><span class="rm-milestone-text">Complete <a href="https://www.coursera.org/professional-certificates/ibm-data-science" target="_blank">IBM Data Science Professional Certificate</a></span></label>
+            <div class="rm-tip">Two major certs &gt; many small ones.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PHASE 3: EXTRACURRICULARS ═══ -->
+    <div class="rm-phase" id="phase-3">
+      <div class="rm-phase-node" id="node-3"><span class="rm-phase-num">3</span></div>
+      <div class="rm-phase-head">
+        <div class="rm-phase-title">Extracurriculars</div>
+        <div class="rm-phase-badge">Leadership</div>
+        <div class="rm-phase-done-count" id="done-3"></div>
+      </div>
+      <div class="rm-grade-grid">
+        <div class="rm-grade-col">
+          <div class="rm-grade-label">Grade 10</div>
+          <div class="rm-cluster">
+            <div class="rm-cluster-title">Volunteer Coaching</div>
+            <label class="rm-milestone"><input class="rm-cb" type="checkbox" data-id="e1"><span class="rm-milestone-text">Formalise &amp; track: students coached, hours/week, weeks/year, age groups</span></label>
+            <label class="rm-milestone"><input class="rm-cb" type="checkbox" data-id="e2"><span class="rm-milestone-text">Format: "Coached 12 youth swimmers, 6 hrs/week, 36 weeks/year"</span></label>
+          </div>
+          <div class="rm-cluster">
+            <div class="rm-cluster-title">Sports Data Club</div>
+            <label class="rm-milestone"><input class="rm-cb" type="checkbox" data-id="e3"><span class="rm-milestone-text">Move beyond membership — lead a project, analyse sports data</span></label>
+            <label class="rm-milestone"><input class="rm-cb" type="checkbox" data-id="e4"><span class="rm-milestone-text">Create visualisations from real athlete performance data</span></label>
+          </div>
+          <div class="rm-cluster">
+            <div class="rm-cluster-title">Community Impact</div>
+            <label class="rm-milestone"><input class="rm-cb" type="checkbox" data-id="e5"><span class="rm-milestone-text">Frame coaching as community impact: youth athletes, underserved students</span></label>
+          </div>
+        </div>
+        <div class="rm-grade-col">
+          <div class="rm-grade-label">Grade 11</div>
+          <div class="rm-cluster">
+            <div class="rm-cluster-title">Coaching Leadership</div>
+            <label class="rm-milestone"><input class="rm-cb" type="checkbox" data-id="e6"><span class="rm-milestone-text">Lead sessions, design training plans, track athlete progress</span></label>
+            <label class="rm-milestone"><input class="rm-cb" type="checkbox" data-id="e7"><span class="rm-milestone-text">Use Python/spreadsheets to visualise athlete performance improvements</span></label>
+            <label class="rm-milestone"><input class="rm-cb" type="checkbox" data-id="e8"><span class="rm-milestone-text">Research junior coaching certificates and federation workshops</span></label>
+            <div class="rm-tip">This directly connects athletics + data science in your application.</div>
+          </div>
+          <div class="rm-cluster">
+            <div class="rm-cluster-title">Found a Club</div>
+            <label class="rm-milestone"><input class="rm-cb" type="checkbox" data-id="e9"><span class="rm-milestone-text">Create a Sports Analytics Club with regular meetings and projects</span></label>
+            <label class="rm-milestone"><input class="rm-cb" type="checkbox" data-id="e10"><span class="rm-milestone-text">Publish a GitHub repo analysing regional swim data &amp; athlete trends</span></label>
+          </div>
+          <div class="rm-cluster">
+            <div class="rm-cluster-title">Narrative: Athlete + Data + Community</div>
+            <label class="rm-milestone"><input class="rm-cb" type="checkbox" data-id="e11"><span class="rm-milestone-text">Use analytics to improve youth sport performance and access</span></label>
+            <label class="rm-milestone"><input class="rm-cb" type="checkbox" data-id="e12"><span class="rm-milestone-text">Build this into your Common App essay: athlete + data science + community</span></label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /.rm-map -->
+
+  <!-- Summary bar -->
+  <div class="rm-summary" id="rm-summary" style="opacity:0;transform:translateY(8px);transition:opacity .5s ease,transform .5s ease;">
+    <div class="rm-summary-item"><div class="rm-summary-val" id="sum-total">38</div><div class="rm-summary-lbl">Total Tasks</div></div>
+    <div class="rm-summary-item"><div class="rm-summary-val" id="sum-done">0</div><div class="rm-summary-lbl">Completed</div></div>
+    <div class="rm-summary-item"><div class="rm-summary-val" id="sum-pct">0%</div><div class="rm-summary-lbl">Progress</div></div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function(){
+  'use strict';
+  const KEY = 'manzil_rm_v3';
+  const saved = JSON.parse(localStorage.getItem(KEY)||'{}');
+
+  // All checkboxes
+  const allCbs = Array.from(document.querySelectorAll('.rm-cb'));
+  const allItems = Array.from(document.querySelectorAll('.rm-milestone, .rm-tip'));
+
+  // Restore saved state
+  allCbs.forEach(cb => {
+    if(saved[cb.dataset.id]) {
+      cb.checked = true;
+      cb.closest('.rm-milestone').classList.add('checked');
+    }
+    cb.addEventListener('change', function(){
+      saved[this.dataset.id] = this.checked;
+      this.closest('.rm-milestone').classList.toggle('checked', this.checked);
+      localStorage.setItem(KEY, JSON.stringify(saved));
+      updateProgress();
+    });
+  });
+
+  function updateProgress(){
+    const total = allCbs.length;
+    const done  = allCbs.filter(c=>c.checked).length;
+    const pct   = total ? Math.round(done/total*100) : 0;
+    document.getElementById('rm-fill').style.width = pct+'%';
+    document.getElementById('rm-ptext').textContent = done+' of '+total+' tasks completed';
+    document.getElementById('sum-done').textContent = done;
+    document.getElementById('sum-total').textContent = total;
+    document.getElementById('sum-pct').textContent = pct+'%';
+
+    // Update phase nodes
+    [1,2,3].forEach(n => {
+      const node = document.getElementById('node-'+n);
+      const phase = document.getElementById('phase-'+n);
+      const phaseCbs = Array.from(phase.querySelectorAll('.rm-cb'));
+      const pd = phaseCbs.filter(c=>c.checked).length;
+      const pt = phaseCbs.length;
+      document.getElementById('done-'+n).textContent = pd+'/'+pt;
+      node.classList.toggle('done', pd===pt && pt>0);
+      node.classList.toggle('active', pd>0 && pd<pt);
+    });
+  }
+
+  // ── AI generation animation: reveal items one by one ──
+  // CSS already starts items at opacity:0 — do NOT set inline style here
+  // (inline style overrides class-based transitions and breaks visibility)
+
+  let delay = 80;
+  allItems.forEach((item) => {
+    setTimeout(() => {
+      item.classList.add('visible');
+    }, delay);
+    delay += 55; // 55ms between each item — feels "typed out" by AI
+  });
+
+  // Show summary after all items revealed
+  setTimeout(() => {
+    const summary = document.getElementById('rm-summary');
+    summary.style.opacity = '1';
+    summary.style.transform = 'translateY(0)';
+    updateProgress();
+  }, delay + 200);
+
+  updateProgress();
+})();
+</script>
+{% endblock %}

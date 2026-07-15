@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Manzil — Honors & Awards{% endblock %}
+{% block body_attrs %}data-page="portfolio-awards"{% endblock %}
+
+{% block content %}
+<div class="pf-page">
+  <div class="pf-header">
+    <a href="/portfolio/" class="pf-back">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Back
+    </a>
+    <div class="pf-step">Step 3 of 4</div>
+    <h1>Honors &amp; Awards</h1>
+    <p>Recognition, medals, scholarships, and achievements that set you apart.</p>
+  </div>
+
+  <form id="form-awards" novalidate>
+    {% csrf_token %}
+    <div class="pf-section">
+      <div class="pf-section-label">Your Awards <span class="pf-opt">add as many as you like</span></div>
+      <div id="awards-list">
+        <div class="pf-textarea-row">
+          <textarea class="pf-textarea" name="awards[]" rows="3" placeholder="e.g. Gold Medal — National Mathematics Olympiad 2024">{% if portfolio.awards %}{{ portfolio.awards.0 }}{% endif %}</textarea>
+        </div>
+      </div>
+      <button type="button" class="pf-add" id="btn-add-award">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1v11M1 6.5h11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        Add another
+      </button>
+    </div>
+
+    <div class="pf-actions">
+      <button type="submit" class="btn btn--primary btn--lg btn--shiny" id="btn-awards">
+        <span class="btn__label">Save &amp; Continue</span>
+        <span class="btn__loader" hidden></span>
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function(){
+  'use strict';
+  const list=document.getElementById('awards-list');
+  const saved={{ portfolio.awards|default:'[]'|safe }};
+  saved.slice(1).forEach(t=>add(t));
+  document.getElementById('btn-add-award').addEventListener('click',()=>add(''));
+  function add(v){ const d=document.createElement('div'); d.className='pf-textarea-row pf-textarea-row--del'; d.innerHTML=`<textarea class="pf-textarea" name="awards[]" rows="3" placeholder="e.g. Gold Medal — National Mathematics Olympiad 2024">${v.replace(/</g,'&lt;')}</textarea><button type="button" class="pf-del-btn" aria-label="Remove"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M1 1l11 11M12 1L1 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>`; d.querySelector('.pf-del-btn').addEventListener('click',()=>d.remove()); list.appendChild(d); }
+
+  document.getElementById('form-awards').addEventListener('submit', async function(e){
+    e.preventDefault();
+    const btn=document.getElementById('btn-awards');
+    btn.disabled=true; btn.querySelector('.btn__label').hidden=true; btn.querySelector('.btn__loader').hidden=false;
+    const data={section:'awards',awards:[]};
+    new FormData(this).forEach((v,k)=>{ if(k==='awards[]') data.awards.push(v); else data[k]=v; });
+    const csrf=(document.cookie.match(/csrftoken=([^;]+)/)||[])[1]||'';
+    try{
+      const r=await fetch('/portfolio/save/',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json','X-CSRFToken':csrf},body:JSON.stringify(data)});
+      const d=await r.json().catch(()=>({}));
+      if(r.ok&&d.success){ window.location.href='/portfolio/subject/'; }
+      else{ alert(d.error||'Could not save.'); btn.disabled=false; btn.querySelector('.btn__label').hidden=false; btn.querySelector('.btn__loader').hidden=true; }
+    }catch{ alert('Network error.'); btn.disabled=false; btn.querySelector('.btn__label').hidden=false; btn.querySelector('.btn__loader').hidden=true; }
+  });
+})();
+</script>
+{% endblock %}

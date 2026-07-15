@@ -1,0 +1,66 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Manzil — Your Path to the World's Best Universities{% endblock %}</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="{% static 'css/manzil.css' %}">
+
+  <!-- Three.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  {% block head_extra %}{% endblock %}
+</head>
+<body {% block body_attrs %}{% endblock %}>
+
+  <!-- Three.js dotted background -->
+  <div id="dotted-bg" style="pointer-events:none;position:fixed;inset:0;z-index:-1;"></div>
+
+  <!-- Navigation (authenticated only) -->
+  {% if user.is_authenticated %}
+  <nav class="nav" role="navigation" aria-label="Main navigation">
+    <div class="nav__inner">
+      <a href="/" class="nav__logo" aria-label="Manzil home">
+        <span class="nav__logo-text gradient-text">Manzil</span>
+      </a>
+
+      <ul class="nav__links" role="list">
+        <li><a href="/" class="nav__link">Home</a></li>
+        <li><a href="/portfolio/" class="nav__link">Portfolio</a></li>
+      </ul>
+
+      <div class="nav__user">
+        <span class="nav__username">{{ user.get_full_name|default:user.email }}</span>
+        <form method="post" action="{% url 'logout' %}" style="display:inline;">
+          {% csrf_token %}
+          <button type="submit" class="btn btn--ghost btn--sm">Sign Out</button>
+        </form>
+      </div>
+    </div>
+  </nav>
+  {% endif %}
+
+  <!-- Breadcrumb slot -->
+  {% block breadcrumb %}{% endblock %}
+
+  <!-- Main content -->
+  <main id="main-content" class="main-content" role="main">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Core scripts -->
+  <script src="{% static 'js/manzil.js' %}"></script>
+  <script src="{% static 'js/animations.js' %}"></script>
+
+  <!-- Page-specific scripts -->
+  {% block extra_scripts %}{% endblock %}
+
+</body>
+</html>

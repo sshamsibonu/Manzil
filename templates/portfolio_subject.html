@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Manzil — Field & Grade{% endblock %}
+{% block body_attrs %}data-page="portfolio-subject"{% endblock %}
+
+{% block content %}
+<div class="pf-page">
+  <div class="pf-header">
+    <a href="/portfolio/" class="pf-back">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Back
+    </a>
+    <div class="pf-step">Step 4 of 4</div>
+    <h1>Field &amp; Grade</h1>
+    <p>Your intended area of study and current academic level.</p>
+  </div>
+
+  <form id="form-subject" novalidate>
+    {% csrf_token %}
+
+    <div class="pf-section">
+      <div class="pf-section-label">Area of Study <span class="pf-req">required</span></div>
+      <div class="chip-grid" id="subject-chips">
+        {% for subject in subject_areas %}
+        <button type="button" class="chip{% if portfolio.subject == subject %} chip--on{% endif %}" data-value="{{ subject }}">{{ subject }}</button>
+        {% endfor %}
+      </div>
+      <input type="hidden" name="subject" id="subject-val" value="{{ portfolio.subject|default:'' }}">
+    </div>
+
+    <div class="pf-section">
+      <div class="pf-section-label">Current Grade <span class="pf-req">required</span></div>
+      <div class="grade-grid" id="grade-btns">
+          <button type="button" class="grade-btn{% if portfolio.grade == '1' %} grade-btn--on{% endif %}" data-value="1">1</button>
+        <button type="button" class="grade-btn{% if portfolio.grade == '2' %} grade-btn--on{% endif %}" data-value="2">2</button>
+        <button type="button" class="grade-btn{% if portfolio.grade == '3' %} grade-btn--on{% endif %}" data-value="3">3</button>
+        <button type="button" class="grade-btn{% if portfolio.grade == '4' %} grade-btn--on{% endif %}" data-value="4">4</button>
+        <button type="button" class="grade-btn{% if portfolio.grade == '5' %} grade-btn--on{% endif %}" data-value="5">5</button>
+        <button type="button" class="grade-btn{% if portfolio.grade == '6' %} grade-btn--on{% endif %}" data-value="6">6</button>
+        <button type="button" class="grade-btn{% if portfolio.grade == '7' %} grade-btn--on{% endif %}" data-value="7">7</button>
+        <button type="button" class="grade-btn{% if portfolio.grade == '8' %} grade-btn--on{% endif %}" data-value="8">8</button>
+        <button type="button" class="grade-btn{% if portfolio.grade == '9' %} grade-btn--on{% endif %}" data-value="9">9</button>
+        <button type="button" class="grade-btn{% if portfolio.grade == '10' %} grade-btn--on{% endif %}" data-value="10">10</button>
+        <button type="button" class="grade-btn{% if portfolio.grade == '11' %} grade-btn--on{% endif %}" data-value="11">11</button>
+      </div>
+      <input type="hidden" name="grade" id="grade-val" value="{{ portfolio.grade|default:'' }}">
+    </div>
+
+    <div class="pf-actions">
+      <button type="submit" class="btn btn--primary btn--lg btn--shiny" id="btn-subject">
+        <span class="btn__label">Complete Portfolio</span>
+        <span class="btn__loader" hidden></span>
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function(){
+  'use strict';
+  function radioGroup(selector, inputId) {
+    const btns = document.querySelectorAll(selector);
+    const inp = document.getElementById(inputId);
+    btns.forEach(b => b.addEventListener('click', function(){
+      btns.forEach(x => x.classList.remove('chip--on','grade-btn--on'));
+      this.classList.add(this.closest('.chip-grid') ? 'chip--on' : 'grade-btn--on');
+      inp.value = this.dataset.value;
+    }));
+  }
+  radioGroup('#subject-chips .chip','subject-val');
+  radioGroup('#grade-btns .grade-btn','grade-val');
+
+  document.getElementById('form-subject').addEventListener('submit', async function(e){
+    e.preventDefault();
+    const sv = document.getElementById('subject-val').value;
+    const gv = document.getElementById('grade-val').value;
+    if (!sv) { alert('Please select a field of study.'); return; }
+    if (!gv) { alert('Please select your grade.'); return; }
+    const btn = document.getElementById('btn-subject');
+    btn.disabled = true;
+    btn.querySelector('.btn__label').hidden = true;
+    btn.querySelector('.btn__loader').hidden = false;
+    const csrf = (document.cookie.match(/csrftoken=([^;]+)/)||[])[1]||'';
+    try {
+      const r = await fetch('/portfolio/save/', {
+        method:'POST', credentials:'same-origin',
+        headers:{'Content-Type':'application/json','X-CSRFToken':csrf},
+        body: JSON.stringify({section:'subject', subject:sv, grade:gv})
+      });
+      const d = await r.json().catch(()=>({}));
+      if (r.ok && d.success) { window.location.href = '/portfolio/complete/'; }
+      else { alert(d.error||'Could not save.'); btn.disabled=false; btn.querySelector('.btn__label').hidden=false; btn.querySelector('.btn__loader').hidden=true; }
+    } catch { alert('Network error.'); btn.disabled=false; btn.querySelector('.btn__label').hidden=false; btn.querySelector('.btn__loader').hidden=true; }
+  });
+})();
+</script>
+{% endblock %}
